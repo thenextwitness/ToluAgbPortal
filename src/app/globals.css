@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Jost:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply antialiased; }
+  body { @apply font-sans bg-white text-black; }
+}
+
+@layer components {
+
+  /* ── Typography ─────────────────────────────────── */
+
+  .hero-title {
+    @apply text-5xl md:text-7xl font-bold leading-none tracking-tight;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-semibold leading-snug text-black;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  .section-label {
+    @apply text-xs font-bold tracking-[0.25em] uppercase text-[#C9A84C];
+    font-family: 'Cinzel', Georgia, serif;
+  }
+
+  .eyebrow {
+    @apply text-xs font-bold tracking-[0.2em] uppercase;
+    font-family: 'Cinzel', Georgia, serif;
+  }
+
+  /* ── Cards ──────────────────────────────────────── */
+
+  .card {
+    @apply bg-white border border-black/10 p-7 hover:border-black/30 transition-colors;
+  }
+
+  .card-gold {
+    @apply bg-white border-l-4 border-[#C9A84C] p-7;
+  }
+
+  /* ── Buttons ────────────────────────────────────── */
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-black text-white
+           px-7 py-3.5 text-sm font-semibold tracking-wide
+           hover:opacity-90 transition-opacity;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center gap-2 bg-[#C9A84C] text-black
+           px-7 py-3.5 text-sm font-semibold tracking-wide
+           hover:bg-[#9E7F2E] transition-colors;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2 border-2 border-black text-black
+           px-7 py-3 text-sm font-semibold tracking-wide
+           hover:bg-black hover:text-white transition-all;
+  }
+
+  /* ── Nav ────────────────────────────────────────── */
+
+  .nav-link {
+    @apply text-sm font-medium text-black/70 hover:text-black transition-colors;
+  }
+
+  .nav-link-active {
+    @apply text-sm font-semibold text-black border-b-2 border-[#C9A84C] pb-0.5;
+  }
+
+  /* ── Diagnostic / form ──────────────────────────── */
+
+  .slide-forward {
+    animation: slide-in-from-right 280ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  .slide-back {
+    animation: slide-in-from-left 280ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  @keyframes slide-in-from-right {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slide-in-from-left {
+    from { opacity: 0; transform: translateX(-24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── Portal (participant / facilitator) ─────────── */
+
+  .page-hero-dark {
+    @apply bg-black text-white px-6 md:px-10 py-16 md:py-24;
+  }
+  .page-hero-inner {
+    @apply max-w-4xl mx-auto;
+  }
+  .page-hero-h1 {
+    @apply font-display text-4xl md:text-6xl font-semibold text-white leading-tight;
+  }
+  .page-hero-sub {
+    @apply text-white/70 max-w-xl leading-relaxed;
+  }
+
+  /* Phase / score pills (reused from coaching portal) */
+  .score-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold;
+  }
+
+  /* Portal page titles (participant + facilitator dashboards) */
+  .page-title {
+    @apply font-display text-3xl md:text-4xl font-semibold text-black leading-tight;
+  }
+
+  /* Secondary button used by some portal pages */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 border-2 border-black text-black
+           px-7 py-3 text-sm font-semibold tracking-wide
+           hover:bg-black hover:text-white transition-all;
+  }
+
+}

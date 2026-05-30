@@ -1,0 +1,11 @@
+# wrangler.toml — Cloudflare Pages configuration for ToluAgb Portal
+name = "toluagb-portal"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[env.preview]
+vars = { NEXT_PUBLIC_API_URL = "http://localhost:3000", NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAADTsDOk5hRFb0z_l" }
+
+[env.production]
+vars = { NEXT_PUBLIC_API_URL = "https://purpose-formation-api-production.up.railway.app", NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAADTsDOk5hRFb0z_l" }
