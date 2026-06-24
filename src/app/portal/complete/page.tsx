@@ -38,7 +38,7 @@ export default function ProgramCompletePage() {
 
     try {
       // POST testimony to backend
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://purpose-formation-api-production.up.railway.app';
       const res = await fetch(`${API_BASE}/api/world/testimony`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

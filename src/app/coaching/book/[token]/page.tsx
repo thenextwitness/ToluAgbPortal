@@ -7,7 +7,7 @@ import Link from 'next/link';
 import SiteNav from '@/components/SiteNav';
 import SiteFooter from '@/components/SiteFooter';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://purpose-formation-api-production.up.railway.app';
 
 const DOMAIN_LABELS: Record<string, string> = {
   LEADERSHIP_INTEGRITY: 'Leadership Integrity', ORGANISATIONAL_CULTURE: 'Culture & Cohesion',

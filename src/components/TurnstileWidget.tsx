@@ -35,7 +35,9 @@ export default function TurnstileWidget({ onToken, theme = 'auto' }: { onToken: 
   const hostRef    = useRef<HTMLDivElement>(null);
   const widgetRef  = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const siteKey    = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  // Public Turnstile site key. Falls back to the shared key if the build-time
+  // env var isn't set (it's public — embedded in the client bundle either way).
+  const siteKey    = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAADTsDOk5hRFb0z_l';
 
   useEffect(() => {
     if (!siteKey) { setError('Turnstile not configured'); return; }

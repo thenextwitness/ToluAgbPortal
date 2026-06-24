@@ -2,7 +2,7 @@
 // All endpoints point to the shared Railway backend.
 // Route paths are identical to PurposeWorldPortal (/api/world/*).
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://purpose-formation-api-production.up.railway.app';
 
 async function request<T>(
   path: string,
