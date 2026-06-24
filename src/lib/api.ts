@@ -135,7 +135,7 @@ export const coachingApi = {
       }>(`/api/world/diagnostic-questions?institutionType=${encodeURIComponent(institutionType)}`),
 
     submit: (data: { institutionType: string; responses: Record<string, number>; contactName?: string; contactEmail?: string; organizationName?: string; cfTurnstileToken?: string }) =>
-      request<{ success: boolean; referenceId?: string }>(
+      request<{ submissionId: string; bookingToken?: string; bookingUrl?: string; discoveryDurationMin?: number; status?: string }>(
         '/api/world/diagnostic/submit',
         { method: 'POST', body: JSON.stringify(data) }
       ),
@@ -155,6 +155,25 @@ export const coachingApi = {
     getById: (bookingId: string) =>
       request<{ id: string; slotDate: string; durationMin: number; status: string; orgName: string; contactName: string; contactEmail: string; signalCode: string | null; meetingLink: string | null }>(
         `/api/world/booking/by-id/${bookingId}`
+      ),
+  },
+
+  plan: {
+    get: (token: string) =>
+      request<{
+        plan: {
+          id: string; signalCode: string; audienceType: string; contactName: string;
+          isPaid: boolean; sessionCount: number; sessionDurationMin: number;
+          ratePerSessionMinor: number; currency: string; totalMinor: number;
+          status: string; recommendationNote: string | null;
+        };
+        programme: { signalCode: string; worldTitle: string; worldSubtitle: string | null; problemHook: string; primaryDomain: string; fruitOutcomes: string } | null;
+      }>(`/api/world/plan/${token}`),
+
+    accept: (token: string, sessionCount?: number) =>
+      request<{ plan: any; nextStatus: string }>(
+        `/api/world/plan/${token}/accept`,
+        { method: 'POST', body: JSON.stringify(sessionCount != null ? { sessionCount } : {}) }
       ),
   },
 };

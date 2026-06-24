@@ -41,8 +41,16 @@ function computeCategoryScores(categories: CategoryGroup[], answers: Record<stri
 const STEP_ASSESSMENT = 1;
 const STEP_SUBMITTED  = 2;
 
+// step -2 = audience choice (individual vs organisation)
+// step -1 = contact form
+// step  0 = organisation context selector (organisations only)
+// step  1 = assessment slides
+// step  2 = submitted
+const STEP_AUDIENCE = -2;
+
 export default function DiagnosticPage() {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(STEP_AUDIENCE);
+  const [audience, setAudience] = useState<'INDIVIDUAL' | 'ORG' | ''>('');
   const [institutionType, setInstitutionType] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -51,6 +59,9 @@ export default function DiagnosticPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  // Booking link returned by the backend on submit (the user books immediately).
+  const [bookingToken, setBookingToken] = useState<string | null>(null);
+  const [discoveryDuration, setDiscoveryDuration] = useState(30);
 
   const [categories, setCategories] = useState<CategoryGroup[]>([]);
   const [questionsLoading, setQuestionsLoading] = useState(false);
@@ -99,6 +110,17 @@ export default function DiagnosticPage() {
     return () => { cancelled = true; };
   }, [institutionType]);
 
+  function handleAudienceSelect(choice: 'INDIVIDUAL' | 'ORG') {
+    setAudience(choice);
+    if (choice === 'INDIVIDUAL') {
+      setInstitutionType('INDIVIDUAL');
+      setStep(-1); // individuals skip the org-context selector
+    } else {
+      setInstitutionType('');
+      setStep(0);  // organisations pick a context type
+    }
+  }
+
   function handleContextSelect(type: string) { setInstitutionType(type); setStep(-1); }
 
   function handleContactNext() {
@@ -132,14 +154,15 @@ export default function DiagnosticPage() {
       setSlideDirection('back');
       setCurrentQuestionIdx((i) => i - 1);
     } else if (step === STEP_ASSESSMENT) { setStep(-1); }
-    else if (step === -1) { setStep(0); }
+    else if (step === -1) { setStep(audience === 'INDIVIDUAL' ? STEP_AUDIENCE : 0); }
+    else if (step === 0) { setStep(STEP_AUDIENCE); }
   }
 
   async function handleSubmit() {
     setSubmitting(true);
     setError('');
     try {
-      await coachingApi.diagnostic.submit({
+      const res = await coachingApi.diagnostic.submit({
         institutionType,
         responses: answers,
         contactName: contactName.trim(),
@@ -147,6 +170,8 @@ export default function DiagnosticPage() {
         organizationName: organizationName.trim() || undefined,
         cfTurnstileToken: turnstileToken ?? undefined,
       });
+      if (res.bookingToken) setBookingToken(res.bookingToken);
+      if (res.discoveryDurationMin) setDiscoveryDuration(res.discoveryDurationMin);
       setSubmitted(true);
       setStep(STEP_SUBMITTED);
     } catch (err) {
@@ -164,16 +189,34 @@ export default function DiagnosticPage() {
         <SiteNav />
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-20">
           <div className="max-w-lg w-full">
-            <p className="section-label mb-3">Reference Submitted</p>
-            <h2 className="section-title mb-4">Submission Confirmed</h2>
-            <p className="text-black/70 mb-3 leading-relaxed">Your needs assessment has been received.</p>
+            <p className="section-label mb-3">Assessment Received</p>
+            <h2 className="section-title mb-4">Now book your discovery call</h2>
             <p className="text-black/70 mb-8 leading-relaxed">
-              I&apos;ll review your submission and email you within 48 hours with a tailored
-              recommendation and a booking link to schedule a 30-minute discovery call.
+              Your assessment is in. The next step is a free <strong>{discoveryDuration}-minute discovery
+              call</strong> with me — pick a time that works for you. {discoveryDuration === 15
+                ? 'A focused conversation to understand where you are and what would help most.'
+                : "We'll review your findings and figure out the right programme for your team."}
             </p>
 
+            {bookingToken ? (
+              <div className="mb-8">
+                <Link href={`/coaching/book/${bookingToken}`} className="btn-gold w-full justify-center text-base py-4">
+                  Book Your Discovery Call →
+                </Link>
+                <p className="text-xs text-black/50 mt-3 text-center">
+                  A confirmation with this booking link has also been emailed to you.
+                </p>
+              </div>
+            ) : (
+              <div className="mb-8 bg-[#FAF6EF] border-l-4 border-[#C9A84C] p-5">
+                <p className="text-sm text-black/80 leading-relaxed">
+                  Check your email — I&apos;ve sent your booking link there to schedule the call.
+                </p>
+              </div>
+            )}
+
             <div className="border-t border-black/10 pt-6 mb-6">
-              <p className="section-label mb-4">Assessment Summary</p>
+              <p className="section-label mb-4">Your Assessment Summary</p>
               <div className="flex flex-wrap gap-2">
                 {categoryScores.map(({ name, score, max }) => (
                   <ScorePill key={name} category={name} score={score} max={max} />
@@ -182,10 +225,6 @@ export default function DiagnosticPage() {
             </div>
 
             <div className="border-t border-black/10 pt-6">
-              <p className="section-label mb-3">While You Wait</p>
-              <p className="text-sm text-black/70 mb-4 leading-relaxed">
-                You may browse the full programme catalogue while your recommendation is prepared.
-              </p>
               <div className="flex flex-col sm:flex-row gap-3 items-start">
                 <Link href="/coaching/programmes" className="btn-outline">Browse the Catalogue →</Link>
                 <Link href="/" className="text-sm text-black/60 hover:text-black transition-colors flex items-center pt-3">
@@ -199,8 +238,8 @@ export default function DiagnosticPage() {
     );
   }
 
-  // ── Context selector ──────────────────────────────────────────────────────────
-  if (step === 0) {
+  // ── Audience choice (individual vs organisation) ──────────────────────────────
+  if (step === STEP_AUDIENCE) {
     return (
       <div className="min-h-screen bg-white">
         <SiteNav />
@@ -210,7 +249,45 @@ export default function DiagnosticPage() {
               ← Back to Coaching
             </Link>
             <p className="section-label mb-4">Needs Assessment</p>
-            <h1 className="section-title mb-3">What&apos;s your context?</h1>
+            <h1 className="section-title mb-3">Who is this for?</h1>
+            <p className="text-black/70 mb-10 text-sm leading-relaxed">
+              A short assessment to find the root of what you&apos;re working on. It takes about
+              ten minutes, and points to the right programme.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                onClick={() => handleAudienceSelect('INDIVIDUAL')}
+                className="card text-left hover:border-[#C9A84C] transition-colors cursor-pointer p-8"
+              >
+                <p className="font-display text-2xl font-semibold text-black mb-2">For myself</p>
+                <p className="text-sm text-black/60 leading-relaxed">Personal coaching and development. A 15-minute discovery call follows.</p>
+              </button>
+              <button
+                onClick={() => handleAudienceSelect('ORG')}
+                className="card text-left hover:border-[#C9A84C] transition-colors cursor-pointer p-8"
+              >
+                <p className="font-display text-2xl font-semibold text-black mb-2">For my organisation</p>
+                <p className="text-sm text-black/60 leading-relaxed">A team, company, or institution. A 30-minute discovery call follows.</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Context selector (organisations) ──────────────────────────────────────────
+  if (step === 0) {
+    return (
+      <div className="min-h-screen bg-white">
+        <SiteNav />
+        <div className="px-6 py-16">
+          <div className="max-w-2xl mx-auto">
+            <button onClick={() => setStep(STEP_AUDIENCE)} className="eyebrow text-black/50 hover:text-black mb-8 inline-block">
+              ← Back
+            </button>
+            <p className="section-label mb-4">Needs Assessment</p>
+            <h1 className="section-title mb-3">What kind of organisation?</h1>
             <p className="text-black/70 mb-10 text-sm leading-relaxed">
               Choose the setting that best describes you. Your selection shapes the
               recommendation you&apos;ll receive.
